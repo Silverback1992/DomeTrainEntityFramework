@@ -1,5 +1,6 @@
 ﻿using DomeTrainEntityFramework.Data;
 using DomeTrainEntityFramework.Models;
+using DomeTrainEntityFramework.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,18 @@ public class MoviesController : Controller
         return Ok(await _context.Movies.ToListAsync());
     }
 
+    [HttpGet("until-age/{ageRating}")]
+    [ProducesResponseType(typeof(List<MovieTitle>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllUntilAge([FromRoute] AgeRating ageRating)
+    {
+        var movies = await _context.Movies
+            .Where(m => m.AgeRating <= ageRating)
+            .Select(m => new MovieTitle { Title = m.Title })
+            .ToListAsync();
+
+        return Ok(movies);
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -33,7 +46,9 @@ public class MoviesController : Controller
         // Similar to FirstOrDefaultAsync, but throws if more than one match found
         // var movie = await _context.Movies.SingleOrDefaultAsync(x => x.Id == id);
         // Servers match from memory if already fetched, otherwise queries database. Returns null if no match found
-        var movie = await _context.Movies.FindAsync(id);
+        // var movie = await _context.Movies.FindAsync(id);
+
+        var movie = await _context.Movies.Include(m => m.Genre).SingleOrDefaultAsync(m => m.Identifier == id);
 
         if (movie == null)
         {
@@ -61,7 +76,7 @@ public class MoviesController : Controller
         await _context.SaveChangesAsync();
         // After SaveChangesAsync, movie will have its Id assigned by the database
 
-        return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
+        return CreatedAtAction(nameof(Get), new { id = movie.Identifier }, movie);
     }
 
     [HttpPut("{id:int}")]

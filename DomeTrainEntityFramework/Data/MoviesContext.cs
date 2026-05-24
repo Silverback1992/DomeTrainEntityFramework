@@ -1,4 +1,5 @@
-﻿using DomeTrainEntityFramework.Models;
+﻿using DomeTrainEntityFramework.Data.EntityMapping;
+using DomeTrainEntityFramework.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DomeTrainEntityFramework.Data;
@@ -14,5 +15,13 @@ public class MoviesContext : DbContext
         // Not proper logging
         optionsBuilder.LogTo(Console.WriteLine);
         base.OnConfiguring(optionsBuilder);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new GenreMapping());
+        modelBuilder.ApplyConfiguration(new MovieMapping());
+
+        //base.OnModelCreating(modelBuilder);
     }
 }
