@@ -42,25 +42,5 @@ public class MovieMapping : IEntityTypeConfiguration<Movie>
             .WithMany(g => g.Movies)
             .HasPrincipalKey(g => g.Id)
             .HasForeignKey(m => m.MainGenreId);
-
-        // Seed data
-
-        builder.HasData(
-            new Movie
-            {
-                Identifier = 1,
-                Title = "The Shawshank Redemption",
-                ReleaseDate = new DateTime(1994, 9, 22),
-                Synopsis = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-                MainGenreId = 1,
-                AgeRating = AgeRating.Adult,
-            });
-
-        builder.OwnsOne(m => m.Director)
-            .HasData(new { MovieIdentifier = 1, FirstName = "Frank", LastName = "Darabont" });
-
-        builder.OwnsMany(m => m.Actors)
-            .HasData(new { MovieIdentifier = 1, Id = 1, FirstName = "Tim", LastName = "Robbins" },
-                     new { MovieIdentifier = 1, Id = 2, FirstName = "Morgan", LastName = "Freeman" });
     }
 }

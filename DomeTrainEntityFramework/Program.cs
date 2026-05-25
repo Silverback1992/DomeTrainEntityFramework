@@ -1,4 +1,5 @@
 ﻿using DomeTrainEntityFramework.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +23,15 @@ var app = builder.Build();
 // DIRTY HACK, we will come back to fix this
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<MoviesContext>();
-context.Database.EnsureDeleted();
-context.Database.EnsureCreated();
+var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+
+if (pendingMigrations.Count() > 0)
+{
+    throw new Exception("Database is not fully migrated for MoviesContext.");
+}
+
+//context.Database.EnsureDeleted();
+//context.Database.EnsureCreated();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
